@@ -11,7 +11,7 @@ public class Transaction {
     private long id;
 
     private LocalDateTime date;
-    private String transactionType;
+    private TransactionType transactionType;
     private Double amount;
 
     @ManyToOne
@@ -36,11 +36,11 @@ public class Transaction {
         this.date = date;
     }
 
-    public String getTransactionType() {
+    public TransactionType getTransactionType() {
         return transactionType;
     }
 
-    public void setTransactionType(String transactionType) {
+    public void setTransactionType(TransactionType transactionType) {
         this.transactionType = transactionType;
     }
 

@@ -64,3 +64,19 @@ Feature: Make a transfer Tests
     }
     """
 
+    Given we GET the saved-link "fromAccountLink" and sub-path "/transactionsFrom"
+
+    Then the response matches:
+    """
+    {
+      "_embedded":{
+        "transactions":[
+          {
+            "transactionType":"TRANSFER",
+            "amount":24.0
+          }
+        ]
+      }
+    }
+    """
+

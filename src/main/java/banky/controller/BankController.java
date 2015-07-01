@@ -5,23 +5,24 @@ import banky.controller.dto.AccountDTO;
 import banky.controller.dto.TransferDTO;
 import banky.model.Account;
 import banky.repository.AccountRepository;
-import org.springframework.beans.BeanUtils;
+import banky.service.TransactionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.inject.Inject;
-import javax.validation.Valid;
 
 @RestController
 public class BankController {
 
     private AccountRepository accountRepository;
+    private TransactionService transactionService;
 
     @Inject
-    public BankController(AccountRepository accountRepository) {
+    public BankController(AccountRepository accountRepository, TransactionService transactionService) {
         this.accountRepository = accountRepository;
+        this.transactionService = transactionService;
     }
 
     @RequestMapping(
@@ -32,6 +33,8 @@ public class BankController {
 
         account.setBalance(account.getBalance() + accountDTO.getAmount());
         accountRepository.save(account);
+
+        transactionService.createLodgeTransaction(account, accountDTO.getAmount());
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -44,12 +47,14 @@ public class BankController {
 
         Account accountFrom = accountRepository.findOne(transferDTO.getAccountFromId());
         Account accountTo = accountRepository.findOne(transferDTO.getAccountToId());
+        double amount = transferDTO.getAmount();
 
-        accountFrom.setBalance(accountFrom.getBalance() - transferDTO.getAmount());
-        accountTo.setBalance(accountTo.getBalance() + transferDTO.getAmount());
+        accountFrom.setBalance(accountFrom.getBalance() - amount);
+        accountTo.setBalance(accountTo.getBalance() + amount);
 
         accountRepository.save(accountTo);
         accountRepository.save(accountFrom);
+        transactionService.createTransferTransaction(accountFrom, accountTo, amount);
 
         return new ResponseEntity<>(HttpStatus.OK);
     }

@@ -32,8 +32,11 @@ public class Account {
     @Digits(fraction=2, integer = 10)
     private Double balance;
 
-    @OneToMany
-    private List<Transaction> transactions;
+    @OneToMany(mappedBy = "accountFrom")
+    private List<Transaction> transactionsFrom;
+
+    @OneToMany(mappedBy = "accountTo")
+    private List<Transaction> transactionsTo;
 
     public long getId() {
         return id;
@@ -75,11 +78,19 @@ public class Account {
         this.balance = balance;
     }
 
-    public List<Transaction> getTransactions() {
-        return transactions;
+    public List<Transaction> getTransactionsFrom() {
+        return transactionsFrom;
     }
 
-    public void setTransactions(List<Transaction> transactions) {
-        this.transactions = transactions;
+    public void setTransactionsFrom(List<Transaction> transactionsFrom) {
+        this.transactionsFrom = transactionsFrom;
+    }
+
+    public List<Transaction> getTransactionsTo() {
+        return transactionsTo;
+    }
+
+    public void setTransactionsTo(List<Transaction> transactionsTo) {
+        this.transactionsTo = transactionsTo;
     }
 }

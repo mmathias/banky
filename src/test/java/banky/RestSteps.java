@@ -79,6 +79,11 @@ public class RestSteps {
         performWithUrl(savedLinks.getProperty(savedLinkName), HttpMethod.GET, "", false);
     }
 
+    @Given("^we GET the saved-link \"([^\"]*)\" and sub-path \"([^\"]*)\"$")
+    public void we_GET_the_saved_link_and_sub_path(String savedLinkName, String subPath) throws Throwable {
+        performWithUrl(savedLinks.getProperty(savedLinkName) + subPath, HttpMethod.GET, "", false);
+    }
+
     private String getJsonResponseString() {
         return ((ResponseEntity<JsonNode>) lastResponse).getBody().toString();
     }
@@ -124,4 +129,5 @@ public class RestSteps {
 
         return propertyReplacer.replacePlaceholders(inputString, savedLinks);
     }
+
 }

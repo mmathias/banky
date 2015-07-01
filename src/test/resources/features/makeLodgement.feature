@@ -36,5 +36,22 @@ Feature: Make a lodgement Tests
     }
     """
 
+    Given we GET the saved-link "accountLink" and sub-path "/transactionsTo"
+
+    Then the response matches:
+    """
+    {
+      "_embedded":{
+        "transactions":[
+          {
+            "transactionType":"LODGEMENT",
+            "amount":24.0
+          }
+        ]
+      }
+    }
+    """
+
+
 
 
