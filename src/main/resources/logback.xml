@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="5 seconds">
+
+    <!-- A dev-time logback file that also outputs to STDOUT -->
+
+    <appender name="consoleAppender" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <charset>UTF-8</charset>
+            <Pattern>%d %-4relative [%thread] %-5level %logger{35} - %msg%n</Pattern>
+        </encoder>
+    </appender>
+
+    <!-- Hush up some of the louder loggers -->
+    <logger name="org.apache.directory" level="WARN"/>
+    <logger name="org.springframework.core.env" level="INFO"/>
+    <logger name="org.hibernate" level="INFO"/>
+
+    <!--NOTE: Enable this to get detailed information on SQL statements that get created.-->
+    <!--  <logger name="org.hibernate.SQL" level="debug"/> -->
+
+    <logger name="org.springframework.beans" level="INFO"/>
+    <logger name="org.springframework.jndi" level="INFO"/>
+    <logger name="org.springframework.web" level="INFO"/>
+    <logger name="org.springframework.security" level="INFO"/>
+    <logger name="org.springframework.orm" level="INFO"/>
+
+    <!--
+    Change this to DEBUG if you want lots of detailed info.
+    Reduced to INFO to let the functional tests run quicker -->
+    <root level="DEBUG">
+        <appender-ref ref="consoleAppender"/>
+    </root>
+</configuration>
