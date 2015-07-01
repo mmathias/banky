@@ -1,6 +1,9 @@
 package banky.model;
 
+import org.hibernate.validator.constraints.NotEmpty;
+
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @Entity
@@ -10,9 +13,17 @@ public class Account {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
 
+    @Column
+    @NotEmpty(message = "Name is required")
     private String name;
+    @Column
+    @NotEmpty(message = "Address is required")
     private String address;
+    @Column
+    @NotEmpty(message = "Phone number is required")
     private String phoneNumber;
+    @Column
+    @NotNull(message = "Balance is required")
     private Double balance;
 
     @OneToMany

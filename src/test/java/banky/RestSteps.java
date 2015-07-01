@@ -9,11 +9,14 @@ import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import junit.framework.Assert;
 import org.skyscreamer.jsonassert.JSONAssert;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.TestRestTemplate;
 import org.springframework.http.*;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
@@ -28,19 +31,15 @@ import static org.junit.Assert.assertEquals;
 
 public class RestSteps {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(RestSteps.class);
+
     private TestRestTemplate restTemplate;
     private ResponseEntity<?> lastResponse = null;
     private final static String BASE_URL = "http://localhost:8080";
 
     @Given("^we (\\w+) the following JSON to \"([^\"]*)\":$")
-    public void we_POST_the_following_JSON_to_(String method, String path, String jsonBody) throws Throwable {
+    public void we_send_by_method_the_following_JSON_to_(String method, String path, String jsonBody) throws Throwable {
         performWithUrl(BASE_URL + path, HttpMethod.valueOf(method), jsonBody, false);
-    }
-
-    @And("^the response code should be <response>$")
-    public void the_response_code_should_be_response() throws Throwable {
-        // Express the Regexp above with the code you wish you had
-        throw new PendingException();
     }
 
     @And("^the last call was (\\w+)$")
@@ -51,6 +50,17 @@ public class RestSteps {
     @Then("^the response matches:$")
     public void the_response_matches(String jsonBody) throws Throwable {
         JSONAssert.assertEquals(jsonBody, getJsonResponseString(), false);
+    }
+
+    @And("^we accept error responses$")
+    public void we_accept_error_responses() throws Throwable {
+        createRestTemplate();
+        restTemplate.setErrorHandler(new DefaultResponseErrorHandler() {
+            @Override
+            public void handleError(ClientHttpResponse response) throws IOException {
+                // don't throw an exception
+            }
+        });
     }
 
     private String getJsonResponseString() {
@@ -102,7 +112,7 @@ public class RestSteps {
                         mapper.enable(SerializationFeature.INDENT_OUTPUT);
                         String indentedRequestBody = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(json);
 
-//                        LOGGER.debug("Sending request to URI {}: \n\n{}", request.getURI().toASCIIString(), indentedRequestBody);
+                        LOGGER.debug("Sending request to URI {}: \n\n{}", request.getURI().toASCIIString(), indentedRequestBody);
                     } catch (Exception e) {
                         // Ignore - probably not JSON
                     }
