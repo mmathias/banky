@@ -6,7 +6,7 @@ Feature: Create Account Tests
     {
       "name": "John",
       "address": "dublin, dublin, dublin",
-      "balance": 234.00,
+      "balance": "234.00",
       "phoneNumber": "23423487"
     }
     """
@@ -20,30 +20,18 @@ Feature: Create Account Tests
     {
       "name": "<name>",
       "address": "<address>",
-      "balance": <balance>,
+      "balance": "<balance>",
       "phoneNumber": "<phoneNumber>"
     }
     """
     And the last call was <response>
-    Then the response matches:
-    """
-    {
-      "error": {
-        "code": "",
-        "cause": "<responseMessage>",
-        "message": "You are not allowed to perform this operation",
-        "links": []
-      }
-    }
-    """
 
     Examples:
-    |name |address          |balance|phoneNumber|response             |responseMessage                    |
-    |     |apto 216, dublin |123.56 |9879879898 |BAD_REQUEST|Name is required             |
-    |Mary |                 |123.56 |9879879898 |BAD_REQUEST|Address is required                |
-    |Mary |apto 216, dublin |       |9879879898 |INTERNAL_SERVER_ERROR|Balance is required                |
-    |Mary |apto 216, dublin |123.56 |           |INTERNAL_SERVER_ERROR|Phone number is required                |
-    |123M |apto 216, dublin |123.56 |9879879898 |INTERNAL_SERVER_ERROR|Name needs to contain only letters |
+    |name |address          |balance|phoneNumber|response   |
+    |     |apto 216, dublin |123.56 |9879879898 |FORBIDDEN  |
+    |Mary |                 |123.56 |9879879898 |FORBIDDEN  |
+    |Mary |apto 216, dublin |       |9879879898 |FORBIDDEN  |
+    |Mary |apto 216, dublin |123.56 |           |FORBIDDEN  |
 
 
 

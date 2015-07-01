@@ -1,30 +1,20 @@
 package banky;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import cucumber.api.PendingException;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
-import junit.framework.Assert;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.TestRestTemplate;
 import org.springframework.http.*;
-import org.springframework.http.client.ClientHttpRequestExecution;
-import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.web.client.DefaultResponseErrorHandler;
-import org.springframework.web.client.ResponseErrorHandler;
-import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Map;
-import java.util.Optional;
 import java.util.function.Function;
 
 import static org.junit.Assert.assertEquals;
@@ -33,7 +23,7 @@ public class RestSteps {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RestSteps.class);
 
-    private TestRestTemplate restTemplate;
+    private TestRestTemplate restTemplate = new TestRestTemplate();
     private ResponseEntity<?> lastResponse = null;
     private final static String BASE_URL = "http://localhost:8080";
 
@@ -54,7 +44,6 @@ public class RestSteps {
 
     @And("^we accept error responses$")
     public void we_accept_error_responses() throws Throwable {
-        createRestTemplate();
         restTemplate.setErrorHandler(new DefaultResponseErrorHandler() {
             @Override
             public void handleError(ClientHttpResponse response) throws IOException {
@@ -78,7 +67,6 @@ public class RestSteps {
         }
 
         HttpEntity<String> entity = new HttpEntity<>(jsonBody, headers);
-        createRestTemplate();
 
         perform(template -> template.exchange(url, method, entity, JsonNode.class, Collections.emptyMap()));
     }
@@ -92,37 +80,4 @@ public class RestSteps {
         return (ResponseEntity<T>) lastResponse;
     }
 
-    public void createRestTemplate() {
-
-        Optional<ResponseErrorHandler> oldErrorHandler = Optional
-                .ofNullable(restTemplate)
-                .map(RestTemplate::getErrorHandler);
-
-        restTemplate = new TestRestTemplate();
-
-        ClientHttpRequestInterceptor ri = new ClientHttpRequestInterceptor() {
-            @Override
-            public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution) throws IOException {
-                if (body.length > 0) {
-
-                    try {
-                        ObjectMapper mapper  = new ObjectMapper();
-                        Object json = mapper.readValue(body, Object.class);
-
-                        mapper.enable(SerializationFeature.INDENT_OUTPUT);
-                        String indentedRequestBody = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(json);
-
-                        LOGGER.debug("Sending request to URI {}: \n\n{}", request.getURI().toASCIIString(), indentedRequestBody);
-                    } catch (Exception e) {
-                        // Ignore - probably not JSON
-                    }
-
-                }
-                return execution.execute(request, body);
-            }
-        };
-        restTemplate.setInterceptors(Arrays.asList(ri));
-
-        oldErrorHandler.ifPresent(restTemplate::setErrorHandler);
-    }
 }
