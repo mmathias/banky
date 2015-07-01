@@ -32,13 +32,35 @@ Feature: Make a transfer Tests
     Given we POST the following JSON to "/transfer":
     """
     {
-      "accountFrom": "${fromAccountLink}",
-      "accountTo": "${toAccountLink}",
-      "amount": "24.00"
+      "accountFromId": "${fromAccountLinkId}",
+      "accountToId": "${toAccountLinkId}",
+      "amount": 24.00
     }
     """
 
-    And the last call was CREATED
+    And the last call was OK
 
+    Given we GET the saved-link "toAccountLink"
 
+    Then the response matches:
+    """
+    {
+      "name": "John",
+      "address": "dublin, dublin, dublin",
+      "balance": 158.0,
+      "phoneNumber": "23423487"
+    }
+    """
+
+    Given we GET the saved-link "fromAccountLink"
+
+    Then the response matches:
+    """
+    {
+      "name": "John",
+      "address": "dublin, dublin, dublin",
+      "balance": 210.0,
+      "phoneNumber": "23423487"
+    }
+    """
 

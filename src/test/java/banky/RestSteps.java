@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.TestRestTemplate;
 import org.springframework.http.*;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.util.PropertyPlaceholderHelper;
 import org.springframework.web.client.DefaultResponseErrorHandler;
 
 import java.io.IOException;
@@ -36,7 +37,7 @@ public class RestSteps {
 
     @Given("^we (\\w+) the following JSON to \"([^\"]*)\":$")
     public void we_send_by_method_the_following_JSON_to_(String method, String path, String jsonBody) throws Throwable {
-        performWithUrl(BASE_URL + path, HttpMethod.valueOf(method), jsonBody, false);
+        performWithUrl(BASE_URL + path, HttpMethod.valueOf(method), templateReplaceSavedLinks(jsonBody), false);
     }
 
     @And("^the last call was (\\w+)$")
@@ -61,8 +62,10 @@ public class RestSteps {
 
     @And("^we save the returned location as a saved-link \"([^\"]*)\"$")
     public void we_save_the_returned_location_as_a_saved_link(String savedLinkName) throws Throwable {
-        URI location = getMandatoryLocationFor(lastResponse);
-        savedLinks.put(savedLinkName, location.toASCIIString());
+        String location = getMandatoryLocationFor(lastResponse).toASCIIString();
+        String id = location.substring(location.lastIndexOf("/") + 1, location.length());
+        savedLinks.put(savedLinkName, location);
+        savedLinks.put(savedLinkName + "Id", id);
     }
 
     @Given("^we (\\w+) the following JSON to saved-link \"([^\"]*)\" and sub-path \"([^\"]*)\":$")
@@ -106,6 +109,7 @@ public class RestSteps {
 
     public URI getMandatoryLocationFor(ResponseEntity<?> response) {
         ensureSuccessfulResponse(response);
+
         return Optional
                 .ofNullable(response.getHeaders().getLocation())
                 .orElseThrow(() -> new RuntimeException("Location header not present. Error text: " + response.getBody()));
@@ -113,5 +117,11 @@ public class RestSteps {
 
     public void ensureSuccessfulResponse(ResponseEntity<?> response) {
         assertThat("The response was successful", response.getStatusCode().is2xxSuccessful(), is(true));
+    }
+
+    private String templateReplaceSavedLinks(String inputString) {
+        PropertyPlaceholderHelper propertyReplacer = new PropertyPlaceholderHelper("${", "}", ",", false);
+
+        return propertyReplacer.replacePlaceholders(inputString, savedLinks);
     }
 }
