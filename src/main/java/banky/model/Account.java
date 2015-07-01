@@ -3,6 +3,8 @@ package banky.model;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.*;
+import javax.validation.constraints.Digits;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
@@ -16,14 +18,18 @@ public class Account {
     @Column
     @NotEmpty(message = "Name is required")
     private String name;
+
     @Column
     @NotEmpty(message = "Address is required")
     private String address;
+
     @Column
     @NotEmpty(message = "Phone number is required")
     private String phoneNumber;
-    @Column
-    @NotNull(message = "Balance is required")
+
+    @NotNull
+    @Min(0)
+    @Digits(fraction=2, integer = 10)
     private Double balance;
 
     @OneToMany

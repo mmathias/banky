@@ -1,6 +1,7 @@
 package banky;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import cucumber.api.PendingException;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
@@ -13,10 +14,15 @@ import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.web.client.DefaultResponseErrorHandler;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Optional;
+import java.util.Properties;
 import java.util.function.Function;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 
 public class RestSteps {
@@ -26,6 +32,7 @@ public class RestSteps {
     private TestRestTemplate restTemplate = new TestRestTemplate();
     private ResponseEntity<?> lastResponse = null;
     private final static String BASE_URL = "http://localhost:8080";
+    private Properties savedLinks = new Properties();
 
     @Given("^we (\\w+) the following JSON to \"([^\"]*)\":$")
     public void we_send_by_method_the_following_JSON_to_(String method, String path, String jsonBody) throws Throwable {
@@ -50,6 +57,23 @@ public class RestSteps {
                 // don't throw an exception
             }
         });
+    }
+
+    @And("^we save the returned location as a saved-link \"([^\"]*)\"$")
+    public void we_save_the_returned_location_as_a_saved_link(String savedLinkName) throws Throwable {
+        URI location = getMandatoryLocationFor(lastResponse);
+        savedLinks.put(savedLinkName, location.toASCIIString());
+    }
+
+    @Given("^we (\\w+) the following JSON to saved-link \"([^\"]*)\" and sub-path \"([^\"]*)\":$")
+    public void we_method_the_following_JSON_to_saved_link_and_sub_path_(String method, String savedLinkName, String subPath, String jsonBody) throws Throwable {
+        HttpMethod httpMethod = HttpMethod.valueOf(method);
+        performWithUrl(savedLinks.getProperty(savedLinkName) + subPath, httpMethod, jsonBody, false);
+    }
+
+    @Given("^we GET the saved-link \"([^\"]*)\"$")
+    public void we_GET_the_saved_link(String savedLinkName) throws Throwable {
+        performWithUrl(savedLinks.getProperty(savedLinkName), HttpMethod.GET, "", false);
     }
 
     private String getJsonResponseString() {
@@ -80,4 +104,14 @@ public class RestSteps {
         return (ResponseEntity<T>) lastResponse;
     }
 
+    public URI getMandatoryLocationFor(ResponseEntity<?> response) {
+        ensureSuccessfulResponse(response);
+        return Optional
+                .ofNullable(response.getHeaders().getLocation())
+                .orElseThrow(() -> new RuntimeException("Location header not present. Error text: " + response.getBody()));
+    }
+
+    public void ensureSuccessfulResponse(ResponseEntity<?> response) {
+        assertThat("The response was successful", response.getStatusCode().is2xxSuccessful(), is(true));
+    }
 }
