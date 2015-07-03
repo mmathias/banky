@@ -1,7 +1,6 @@
 package banky;
 
 import banky.repository.AccountRepository;
-import banky.validator.AccountValidator;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
@@ -22,8 +21,4 @@ public class Application extends RepositoryRestMvcConfiguration {
         SpringApplication.run(Application.class, args);
     }
 
-//    @Override
-//    protected void configureValidatingRepositoryEventListener(ValidatingRepositoryEventListener v) {
-//        v.addValidator("beforeCreate", new AccountValidator());
-//    }
 }

@@ -31,6 +31,16 @@ public class ExceptionControllerAdvice {
     public ResponseEntity<ErrorResponse> handleConstraintViolationException(ConstraintViolationException e) {
         return new ResponseEntity<ErrorResponse>(handleException(e, ErrorCodes.INTERNAL_ERROR_CODE, true), HttpStatus.FORBIDDEN);
     }
+
+    @ExceptionHandler(value = { AccountDoesntExist.class })
+    public ResponseEntity<ErrorResponse> handleAccountDoesntExistException(AccountDoesntExist e) {
+        return new ResponseEntity<ErrorResponse>(handleException(e, ErrorCodes.INTERNAL_ERROR_CODE, true), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(value = { OutOfFoundsException.class })
+    public ResponseEntity<ErrorResponse> handleOutOfFoundsException(OutOfFoundsException e) {
+        return new ResponseEntity<ErrorResponse>(handleException(e, ErrorCodes.INTERNAL_ERROR_CODE, true), HttpStatus.BAD_REQUEST);
+    }
 }
 
 

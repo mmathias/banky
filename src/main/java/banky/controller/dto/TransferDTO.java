@@ -2,17 +2,8 @@ package banky.controller.dto;
 
 public class TransferDTO {
 
-    private Long accountFromId;
     private Long accountToId;
     private double amount;
-
-    public Long getAccountFromId() {
-        return accountFromId;
-    }
-
-    public void setAccountFromId(Long accountFromId) {
-        this.accountFromId = accountFromId;
-    }
 
     public Long getAccountToId() {
         return accountToId;

@@ -3,6 +3,8 @@ package banky.controller;
 
 import banky.controller.dto.AccountDTO;
 import banky.controller.dto.TransferDTO;
+import banky.exception.AccountDoesntExist;
+import banky.exception.OutOfFoundsException;
 import banky.model.Account;
 import banky.repository.AccountRepository;
 import banky.service.TransactionService;
@@ -31,6 +33,10 @@ public class BankController {
         produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> makeLodgement(@PathVariable("accountId") Account account, @RequestBody AccountDTO accountDTO) {
 
+        if (account == null) {
+            throw new AccountDoesntExist("Account doesn't exist!");
+        }
+
         account.setBalance(account.getBalance() + accountDTO.getAmount());
         accountRepository.save(account);
 
@@ -40,22 +46,40 @@ public class BankController {
     }
 
     @RequestMapping(
-            value = "/transfer",
+            value = "/accounts/{accountId}/transfer",
             method = RequestMethod.POST,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> transfer(@RequestBody TransferDTO transferDTO) {
+    public ResponseEntity<?> transfer(@PathVariable("accountId") Account account, @RequestBody TransferDTO transferDTO) {
 
-        Account accountFrom = accountRepository.findOne(transferDTO.getAccountFromId());
-        Account accountTo = accountRepository.findOne(transferDTO.getAccountToId());
+        Account accountTo = validateBeforeTransfer(account, transferDTO);
+
         double amount = transferDTO.getAmount();
 
-        accountFrom.setBalance(accountFrom.getBalance() - amount);
+        account.setBalance(account.getBalance() - amount);
         accountTo.setBalance(accountTo.getBalance() + amount);
 
         accountRepository.save(accountTo);
-        accountRepository.save(accountFrom);
-        transactionService.createTransferTransaction(accountFrom, accountTo, amount);
+        accountRepository.save(account);
+        transactionService.createTransferTransaction(account, accountTo, amount);
 
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+
+    private Account validateBeforeTransfer(Account account, TransferDTO transferDTO) {
+        if (account == null) {
+            throw new AccountDoesntExist("Account doesn't exist!");
+        }
+
+        if (account.getBalance() < transferDTO.getAmount()) {
+            throw new OutOfFoundsException("Not enough money to make this transaction.");
+        }
+
+        Account accountTo = accountRepository.findOne(transferDTO.getAccountToId());
+        if (accountTo == null) {
+            throw new AccountDoesntExist("Account doesn't exist!");
+        }
+
+        return accountTo;
     }
 }

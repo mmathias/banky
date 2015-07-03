@@ -1,7 +1,6 @@
-package banky;
+package functional.banky;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import cucumber.api.PendingException;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
@@ -71,7 +70,7 @@ public class RestSteps {
     @Given("^we (\\w+) the following JSON to saved-link \"([^\"]*)\" and sub-path \"([^\"]*)\":$")
     public void we_method_the_following_JSON_to_saved_link_and_sub_path_(String method, String savedLinkName, String subPath, String jsonBody) throws Throwable {
         HttpMethod httpMethod = HttpMethod.valueOf(method);
-        performWithUrl(savedLinks.getProperty(savedLinkName) + subPath, httpMethod, jsonBody, false);
+        performWithUrl(savedLinks.getProperty(savedLinkName) + subPath, httpMethod, templateReplaceSavedLinks(jsonBody), false);
     }
 
     @Given("^we GET the saved-link \"([^\"]*)\"$")
